@@ -28,30 +28,15 @@ jobs:
         run: |
           echo "🚀 Release workflow triggered"
           echo "Event name: ${{ github.event_name }}"
-          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            echo "Repository dispatch event received"
-            echo "Event: ${{ toJson(github.event) }}"
-          else
-            echo "Manual workflow dispatch"
-            echo "Repo: ${{ github.event.inputs.repo }}"
-            echo "Version: ${{ github.event.inputs.version }}"
-            echo "Run ID: ${{ github.event.inputs.run_id }}"
-          fi
+          echo "Repository dispatch event received"
+          echo "Event: ${{ toJson(github.event) }}"
 
       - name: Extract parameters
         id: params
         run: |
-          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            # Parameters from repository dispatch
-            REPO="${{ github.event.client_payload.repo }}"
-            VERSION="${{ github.event.client_payload.version }}"
-            RUN_ID="${{ github.event.client_payload.run_id }}"
-          else
-            # Parameters from manual workflow dispatch
-            REPO="${{ github.event.inputs.repo }}"
-            VERSION="${{ github.event.inputs.version }}"
-            RUN_ID="${{ github.event.inputs.run_id }}"
-          fi
+          REPO="${{ github.event.client_payload.repo }}"
+          VERSION="${{ github.event.client_payload.version }}"
+          RUN_ID="${{ github.event.client_payload.run_id }}"
 
           # Validate required parameters
           if [ -z "$REPO" ] || [ -z "$VERSION" ]; then
