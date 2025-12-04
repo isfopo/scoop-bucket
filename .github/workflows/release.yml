@@ -28,7 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
     
     steps:
       - name: Checkout repository
@@ -130,20 +129,28 @@ jobs:
             exit 1
           fi
           
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Update ${{ steps.params.outputs.repo }} to version ${{ steps.params.outputs.version }}"
-          title: "Update ${{ steps.params.outputs.repo }} to v${{ steps.params.outputs.version }}"
-          body: |
-            Automated update triggered by ${{ github.event_name == 'repository_dispatch' && 'repository dispatch' || 'manual workflow' }}.
+      - name: Commit and push changes
+        run: |
+          MANIFEST_FILE="${{ steps.params.outputs.manifest_file }}"
+          REPO="${{ steps.params.outputs.repo }}"
+          VERSION="${{ steps.params.outputs.version }}"
+          
+          # Configure git user
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Add updated manifest
+          git add "$MANIFEST_FILE"
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "ℹ️ No changes to manifest - already up to date"
+          else
+            echo "📝 Committing and pushing changes..."
+            git commit -m "Update $REPO to version $VERSION"
             
-            **Repository:** ${{ steps.params.outputs.repo }}
-            **Version:** ${{ steps.params.outputs.version }}
-            **Run ID:** ${{ steps.params.outputs.run_id }}
-            **Manifest:** ${{ steps.params.outputs.manifest_file }}
+            # Push to main branch
+            git push origin main
             
-            This PR was created automatically by the release workflow.
-          branch: "update-${{ steps.params.outputs.repo_name }}-${{ steps.params.outputs.version }}"
-          delete-branch: true
+            echo "✅ Changes committed and pushed successfully"
+          fi

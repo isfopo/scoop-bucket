@@ -101,6 +101,7 @@ jobs:
 2. **Manual Trigger**: You can also manually trigger the workflow and specify a tag
 3. **Simplified Payload**: Only sends version, repo, and run_id - the bucket fetches release details automatically
 4. **Asset Detection**: The bucket automatically finds the Windows amd64 asset and calculates its hash
+5. **Direct Commits**: Changes are committed directly to the main branch (no pull requests)
 
 **Required Secrets:**
 
@@ -117,6 +118,8 @@ You can also trigger updates directly in the scoop-bucket repository:
    - **Repository path**: `owner/repo` (e.g., `myorg/soundcheck`)
    - **Version**: Version number (e.g., `1.0.0`)
    - **Run ID**: Optional GitHub Actions run ID for tracking
+
+The workflow will update the manifest and commit changes directly to the main branch.
 
 ### Manifest Structure
 
@@ -184,8 +187,8 @@ Unified workflow that handles both automatic and manual manifest updates:
 
 - **Repository Dispatch**: Triggered by other repositories when they publish releases
 - **Manual Dispatch**: Can be run manually from the Actions tab with custom parameters
-- **Validation**: Automatically validates updated manifests before creating pull requests
-- **Pull Requests**: Creates PRs for all manifest updates with detailed change information
+- **Validation**: Automatically validates updated manifests before committing changes
+- **Direct Commits**: Commits and pushes changes directly to main branch (no PRs)
 
 ### `validate-manifests.yml`
 
