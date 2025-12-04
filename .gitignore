@@ -1,0 +1,28 @@
+# Add files that are commonly tracked in git repositories
+*.json
+*.md
+*.yml
+*.yaml
+*.js
+
+# Scoop bucket specific files
+bucket/*.json
+scripts/*.js
+.github/workflows/*.yml
+.github/workflows/*.yaml
+
+# Documentation
+README.md
+LICENSE
+
+# Exclude common development and system files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+node_modules/
+.env
+.env.*
+dist/
+build/
+coverage/
