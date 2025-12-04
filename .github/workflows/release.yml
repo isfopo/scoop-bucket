@@ -1,45 +1,42 @@
 name: Release
 
-# Unified workflow that can be triggered by API or manually
 on:
-  # Triggered by other repositories via repository dispatch
   repository_dispatch:
-    types: [release-update]
-  
-  # Manual trigger for testing or direct updates
+    types: [scoop-release]
+
   workflow_dispatch:
     inputs:
       repo:
-        description: 'Repository path (owner/repo)'
+        description: "Repository path (owner/repo)"
         required: true
         type: string
       version:
-        description: 'Version (e.g., 1.0.0)'
+        description: "Version (e.g., 1.0.0)"
         required: true
         type: string
       run_id:
-        description: 'GitHub Actions run ID'
+        description: "GitHub Actions run ID"
         required: false
         type: string
-        default: ''
+        default: ""
 
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          
+          node-version: "18"
+
       - name: Display event information
         run: |
           echo "🚀 Release workflow triggered"
@@ -53,7 +50,7 @@ jobs:
             echo "Version: ${{ github.event.inputs.version }}"
             echo "Run ID: ${{ github.event.inputs.run_id }}"
           fi
-          
+
       - name: Extract parameters
         id: params
         run: |
@@ -68,59 +65,59 @@ jobs:
             VERSION="${{ github.event.inputs.version }}"
             RUN_ID="${{ github.event.inputs.run_id }}"
           fi
-          
+
           # Validate required parameters
           if [ -z "$REPO" ] || [ -z "$VERSION" ]; then
             echo "❌ Missing required parameters: repo and version"
             exit 1
           fi
-          
+
           # Extract repo name from full repo path (owner/repo)
           REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
-          
+
           # Determine manifest file name (convert repo name to lowercase)
           MANIFEST_NAME=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')
           MANIFEST_FILE="bucket/${MANIFEST_NAME}.json"
-          
+
           # Set outputs for use in subsequent steps
           echo "repo=$REPO" >> $GITHUB_OUTPUT
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
           echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
           echo "manifest_file=$MANIFEST_FILE" >> $GITHUB_OUTPUT
-          
+
           echo "📋 Extracted parameters:"
           echo "   Repository: $REPO"
           echo "   Version: $VERSION"
           echo "   Run ID: $RUN_ID"
           echo "   Manifest file: $MANIFEST_FILE"
-          
+
       - name: Check manifest exists
         run: |
           MANIFEST_FILE="${{ steps.params.outputs.manifest_file }}"
-          
+
           if [ ! -f "$MANIFEST_FILE" ]; then
             echo "❌ Manifest file $MANIFEST_FILE does not exist"
             echo "Please create a manifest file for this repository first"
             exit 1
           fi
-          
+
           echo "✅ Manifest file found: $MANIFEST_FILE"
-          
+
       - name: Update manifest
         run: |
           MANIFEST_FILE="${{ steps.params.outputs.manifest_file }}"
           REPO="${{ steps.params.outputs.repo }}"
           VERSION="${{ steps.params.outputs.version }}"
           RUN_ID="${{ steps.params.outputs.run_id }}"
-          
+
           echo "🔄 Updating manifest..."
           node scripts/update-manifest.js "$MANIFEST_FILE" "$REPO" "$VERSION" "$RUN_ID"
-          
+
       - name: Validate updated manifest
         run: |
           MANIFEST_FILE="${{ steps.params.outputs.manifest_file }}"
-          
+
           echo "🔍 Validating updated manifest..."
           if node scripts/validate-manifest.js "$MANIFEST_FILE"; then
             echo "✅ Manifest validation passed"
@@ -128,20 +125,20 @@ jobs:
             echo "❌ Manifest validation failed"
             exit 1
           fi
-          
+
       - name: Commit and push changes
         run: |
           MANIFEST_FILE="${{ steps.params.outputs.manifest_file }}"
           REPO="${{ steps.params.outputs.repo }}"
           VERSION="${{ steps.params.outputs.version }}"
-          
+
           # Configure git user
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          
+
           # Add updated manifest
           git add "$MANIFEST_FILE"
-          
+
           # Check if there are changes to commit
           if git diff --staged --quiet; then
             echo "ℹ️ No changes to manifest - already up to date"
