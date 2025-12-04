@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "description": "Soundcheck - Audio testing and validation tool",
+  "homepage": "https://github.com/your-org/soundcheck",
+  "license": "MIT",
+  "url": "https://github.com/your-org/soundcheck/releases/download/v1.0.0/soundcheck-1.0.0-windows-amd64.zip",
+  "hash": "sha256_placeholder",
+  "bin": "soundcheck.exe",
+  "checkver": {
+    "github": "https://github.com/your-org/soundcheck"
+  },
+  "autoupdate": {
+    "url": "https://github.com/your-org/soundcheck/releases/download/v$version/soundcheck-$version-windows-amd64.zip",
+    "hash": {
+      "url": "$url.sha256"
+    }
+  }
+}
