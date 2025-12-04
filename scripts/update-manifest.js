@@ -161,12 +161,15 @@ async function updateManifest(manifestPath, repo, newVersion, runId) {
     if (!fs.existsSync(manifestPath)) {
       throw new Error(`Manifest file not found: ${manifestPath}`);
     }
-
-    const manifestContent = fs.readFileSync(manifestPath, "utf8");
+    
+    const manifestContent = fs.readFileSync(manifestPath, 'utf8');
     const manifest = JSON.parse(manifestContent);
-
+    
     console.log(`📄 Processing manifest: ${manifestPath}`);
-
+    console.log(`📋 Repository parameter: "${repo}"`);
+    console.log(`📋 Version parameter: "${newVersion}"`);
+    console.log(`📋 Run ID parameter: "${runId}"`);
+    
     // Get release information from GitHub API
     const releaseInfo = await getReleaseInfo(repo, newVersion);
 
