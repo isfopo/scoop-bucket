@@ -31,12 +31,19 @@ const [manifestFile, repo, version, runId] = args;
  */
 function httpsRequest(url) {
   return new Promise((resolve, reject) => {
-    const request = https.get(url, {
+    const options = {
       headers: {
         'User-Agent': 'scoop-bucket-update',
         'Accept': 'application/vnd.github.v3+json'
       }
-    }, (response) => {
+    };
+    
+    // Add authentication if token is available
+    if (process.env.GITHUB_TOKEN) {
+      options.headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+    }
+    
+    const request = https.get(url, options, (response) => {
       let data = '';
       
       response.on('data', (chunk) => {

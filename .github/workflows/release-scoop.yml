@@ -77,6 +77,8 @@ jobs:
           echo "✅ Manifest file found: $MANIFEST_FILE"
 
       - name: Update manifest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           MANIFEST_FILE="${{ steps.params.outputs.manifest_file }}"
           REPO="${{ steps.params.outputs.repo }}"
