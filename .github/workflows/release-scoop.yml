@@ -1,24 +1,11 @@
-name: Release
+name: Release Scoop
 
 on:
   repository_dispatch:
     types: [scoop-release]
 
-  workflow_dispatch:
-    inputs:
-      repo:
-        description: "Repository path (owner/repo)"
-        required: true
-        type: string
-      version:
-        description: "Version (e.g., 1.0.0)"
-        required: true
-        type: string
-      run_id:
-        description: "GitHub Actions run ID"
-        required: false
-        type: string
-        default: ""
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
   release:
