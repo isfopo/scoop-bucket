@@ -9,6 +9,7 @@ env:
 
 jobs:
   release:
+    name: Release Scoop
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -78,18 +79,7 @@ jobs:
 
       - name: Update manifest
         run: |
-          MANIFEST_FILE="${{ steps.params.outputs.manifest_file }}"
-          REPO="${{ steps.params.outputs.repo }}"
-          VERSION="${{ steps.params.outputs.version }}"
-          RUN_ID="${{ steps.params.outputs.run_id }}"
-
-          echo "🔄 Updating manifest..."
-          echo "Manifest file: $MANIFEST_FILE"
-          echo "Repository: $REPO"
-          echo "Version: $VERSION"
-          echo "Run ID: $RUN_ID"
-          
-          node scripts/update-manifest.js "$MANIFEST_FILE" "$REPO" "$VERSION" "$RUN_ID"
+          node scripts/update-manifest.js "${{ steps.params.outputs.manifest_file }}" "${{ steps.params.outputs.repo }}" "${{ steps.params.outputs.version }}" "${{ steps.params.outputs.run_id }}"
 
       - name: Validate updated manifest
         run: |
