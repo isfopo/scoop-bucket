@@ -84,6 +84,11 @@ jobs:
           RUN_ID="${{ steps.params.outputs.run_id }}"
 
           echo "🔄 Updating manifest..."
+          echo "Manifest file: $MANIFEST_FILE"
+          echo "Repository: $REPO"
+          echo "Version: $VERSION"
+          echo "Run ID: $RUN_ID"
+          
           node scripts/update-manifest.js "$MANIFEST_FILE" "$REPO" "$VERSION" "$RUN_ID"
 
       - name: Validate updated manifest
