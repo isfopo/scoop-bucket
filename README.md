@@ -106,6 +106,18 @@ jobs:
 
 - `SCOOP_BUCKET_TOKEN`: A Personal Access Token with `repo` scope that can trigger dispatch events in the scoop-bucket repository
 
+#### Manual Updates
+
+You can also trigger updates directly in the scoop-bucket repository:
+
+1. Go to the **Actions** tab in the scoop-bucket repository
+2. Select the **Release** workflow
+3. Click **Run workflow**
+4. Fill in the required parameters:
+   - **Repository path**: `owner/repo` (e.g., `myorg/soundcheck`)
+   - **Version**: Version number (e.g., `1.0.0`)
+   - **Run ID**: Optional GitHub Actions run ID for tracking
+
 ### Manifest Structure
 
 Each manifest in the `bucket/` directory follows the Scoop manifest format:
@@ -166,13 +178,18 @@ node scripts/validate-manifest.js <manifest-file>
 
 ## Workflows
 
+### `release.yml`
+
+Unified workflow that handles both automatic and manual manifest updates:
+
+- **Repository Dispatch**: Triggered by other repositories when they publish releases
+- **Manual Dispatch**: Can be run manually from the Actions tab with custom parameters
+- **Validation**: Automatically validates updated manifests before creating pull requests
+- **Pull Requests**: Creates PRs for all manifest updates with detailed change information
+
 ### `validate-manifests.yml`
 
 Runs on every push and pull request to validate all manifest files in the bucket.
-
-### `update-manifest.yml`
-
-Triggered by repository dispatch events from other repositories to automatically update manifests.
 
 ## Contributing
 
