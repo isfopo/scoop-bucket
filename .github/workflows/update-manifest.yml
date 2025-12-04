@@ -31,13 +31,14 @@ jobs:
       - name: Update manifest with release info
         run: |
           # Extract release information from the payload
-          REPO_NAME="${{ github.event.client_payload.repository }}"
+          REPO="${{ github.event.client_payload.repo }}"
           VERSION="${{ github.event.client_payload.version }}"
-          RELEASE_URL="${{ github.event.client_payload.release_url }}"
-          ASSET_URL="${{ github.event.client_payload.asset_url }}"
-          HASH="${{ github.event.client_payload.hash }}"
+          RUN_ID="${{ github.event.client_payload.run_id }}"
           
-          echo "Updating manifest for $REPO_NAME version $VERSION"
+          echo "Updating manifest for $REPO version $VERSION (run ID: $RUN_ID)"
+          
+          # Extract repo name from full repo path (owner/repo)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
           
           # Determine manifest file name (convert repo name to lowercase)
           MANIFEST_NAME=$(echo "$REPO_NAME" | tr '[:upper:]' '[:lower:]')
@@ -50,7 +51,7 @@ jobs:
           fi
           
           # Update the manifest using Node.js script
-          node scripts/update-manifest.js "$MANIFEST_FILE" "$VERSION" "$RELEASE_URL" "$ASSET_URL" "$HASH"
+          node scripts/update-manifest.js "$MANIFEST_FILE" "$REPO" "$VERSION" "$RUN_ID"
           
           echo "Manifest updated successfully"
           
@@ -58,15 +59,15 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Update ${{ github.event.client_payload.repository }} to version ${{ github.event.client_payload.version }}"
-          title: "Update ${{ github.event.client_payload.repository }} to v${{ github.event.client_payload.version }}"
+          commit-message: "Update ${{ github.event.client_payload.repo }} to version ${{ github.event.client_payload.version }}"
+          title: "Update ${{ github.event.client_payload.repo }} to v${{ github.event.client_payload.version }}"
           body: |
-            Automated update triggered by release from `${{ github.event.client_payload.repository }}`.
+            Automated update triggered by release from `${{ github.event.client_payload.repo }}`.
             
             **Changes:**
             - Version: ${{ github.event.client_payload.version }}
-            - Release: ${{ github.event.client_payload.release_url }}
+            - Run ID: ${{ github.event.client_payload.run_id }}
             
             This PR was created automatically by the repository dispatch workflow.
-          branch: "update-${{ github.event.client_payload.repository }}-${{ github.event.client_payload.version }}"
+          branch: "update-${{ github.event.client_payload.repo }}-${{ github.event.client_payload.version }}"
           delete-branch: true

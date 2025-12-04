@@ -67,55 +67,44 @@ name: Update Scoop Manifest
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag (e.g., v1.0.0)'
+        required: true
+        type: string
 
 jobs:
-  update-scoop:
+  trigger-scoop:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    
     steps:
-      - name: Get release info
-        id: release
-        run: |
-          # Extract information from the release
-          REPO_NAME="${{ github.event.repository.name }}"
-          VERSION="${{ github.event.release.tag_name }}"
-          VERSION="${VERSION#v}"  # Remove 'v' prefix if present
-          RELEASE_URL="${{ github.event.release.html_url }}"
-          
-          # Find the Windows asset (adjust pattern as needed)
-          ASSET_URL=$(curl -s "${{ github.event.release.assets_url }}" | \
-                     jq -r '.[] | select(.name | contains("windows") and contains("amd64")) | .browser_download_url')
-          
-          # Download and calculate hash
-          curl -L -o asset "$ASSET_URL"
-          HASH=$(sha256sum asset | cut -d' ' -f1)
-          
-          echo "repo_name=$REPO_NAME" >> $GITHUB_OUTPUT
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "release_url=$RELEASE_URL" >> $GITHUB_OUTPUT
-          echo "asset_url=$ASSET_URL" >> $GITHUB_OUTPUT
-          echo "hash=$HASH" >> $GITHUB_OUTPUT
-          
       - name: Trigger bucket update
         run: |
           curl -X POST \
             -H "Authorization: token ${{ secrets.SCOOP_BUCKET_TOKEN }}" \
             -H "Accept: application/vnd.github.everest-preview+json" \
             -H "Content-Type: application/json" \
-            https://api.github.com/repos/your-username/scoop-bucket/dispatches \
+            https://api.github.com/repos/isfopo/scoop-bucket/dispatches \
             -d '{
               "event_type": "release-update",
               "client_payload": {
-                "repository": "${{ steps.release.outputs.repo_name }}",
-                "version": "${{ steps.release.outputs.version }}",
-                "release_url": "${{ steps.release.outputs.release_url }}",
-                "asset_url": "${{ steps.release.outputs.asset_url }}",
-                "hash": "${{ steps.release.outputs.hash }}"
+                "version": "${{ github.event.inputs.tag_name || github.event.release.tag_name }}",
+                "repo": "${{ github.repository }}",
+                "run_id": "${{ github.run_id }}"
               }
             }'
 ```
+
+**How it works:**
+
+1. **Automatic Trigger**: When a new release is published, the workflow automatically triggers
+2. **Manual Trigger**: You can also manually trigger the workflow and specify a tag
+3. **Simplified Payload**: Only sends version, repo, and run_id - the bucket fetches release details automatically
+4. **Asset Detection**: The bucket automatically finds the Windows amd64 asset and calculates its hash
+
+**Required Secrets:**
+
+- `SCOOP_BUCKET_TOKEN`: A Personal Access Token with `repo` scope that can trigger dispatch events in the scoop-bucket repository
 
 ### Manifest Structure
 
@@ -148,11 +137,24 @@ This repository includes several utility scripts:
 
 ### `scripts/update-manifest.js`
 
-Updates a manifest file with new release information.
+Updates a manifest file with new release information by fetching data from GitHub API.
 
 ```bash
-node scripts/update-manifest.js <manifest-file> <version> <release-url> <asset-url> <hash>
+node scripts/update-manifest.js <manifest-file> <repo> <version> <run-id>
 ```
+
+**Arguments:**
+- `manifest-file`: Path to the JSON manifest file
+- `repo`: Full repository path (owner/repo)
+- `version`: New version to update
+- `run-id`: GitHub Actions run ID that triggered the update
+
+The script automatically:
+- Fetches release information from GitHub API
+- Finds the Windows amd64 asset
+- Downloads the asset and calculates SHA256 hash
+- Updates the manifest with new version, URL, and hash
+- Configures autoupdate templates for future releases
 
 ### `scripts/validate-manifest.js`
 
