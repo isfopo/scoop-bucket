@@ -1,18 +1,18 @@
 {
-  "version": "0.0.36",
+  "version": "0.0.37",
   "description": "Soundcheck - Audio testing and validation tool",
   "homepage": "https://github.com/isfopo/soundcheck",
   "license": "MIT",
-  "url": "https://github.com/isfopo/soundcheck/releases/download/0.0.36/soundcheck-x86_64-pc-windows-msvc.zip",
-  "hash": "a1f650f9e8eb0f1f78d1b59ef2b4c7bb7368c5a78860f63117e5eb1ece045536",
+  "url": "https://github.com/isfopo/soundcheck/releases/download/0.0.37/soundcheck-x86_64-pc-windows-msvc.zip",
+  "hash": "1870b6cbb720c5aadeb90027481f88e5e111f4723e7b122c52cfdce7f5d95407",
   "bin": "soundcheck.exe",
   "checkver": {
     "github": "https://github.com/isfopo/soundcheck"
   },
   "autoupdate": {
-    "url": "https://github.com/isfopo/soundcheck/releases/download/0.0.36/soundcheck-x86_64-pc-windows-msvc.zip",
+    "url": "https://github.com/isfopo/soundcheck/releases/download/0.0.37/soundcheck-x86_64-pc-windows-msvc.zip",
     "hash": {
-      "url": "https://github.com/isfopo/soundcheck/releases/download/0.0.36/soundcheck-x86_64-pc-windows-msvc.zip.sha256"
+      "url": "https://github.com/isfopo/soundcheck/releases/download/0.0.37/soundcheck-x86_64-pc-windows-msvc.zip.sha256"
     }
   }
 }
