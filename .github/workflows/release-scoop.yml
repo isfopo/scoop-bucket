@@ -35,6 +35,7 @@ jobs:
       - name: Extract parameters
         id: params
         run: |
+          OWNER="${{ github.event.client_payload.owner }}"
           REPO="${{ github.event.client_payload.repo }}"
           VERSION="${{ github.event.client_payload.version }}"
           RUN_ID="${{ github.event.client_payload.run_id }}"
@@ -53,6 +54,7 @@ jobs:
           MANIFEST_FILE="bucket/${MANIFEST_NAME}.json"
 
           # Set outputs for use in subsequent steps
+          echo "owner=$OWNER" >> $GITHUB_OUTPUT
           echo "repo=$REPO" >> $GITHUB_OUTPUT
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
@@ -67,26 +69,23 @@ jobs:
 
       - name: Check manifest exists
         run: |
-          MANIFEST_FILE="${{ steps.params.outputs.manifest_file }}"
 
-          if [ ! -f "$MANIFEST_FILE" ]; then
-            echo "❌ Manifest file $MANIFEST_FILE does not exist"
+          if [ ! -f "${{ steps.params.outputs.manifest_file }}" ]; then
+            echo "❌ Manifest file does not exist"
             echo "Please create a manifest file for this repository first"
             exit 1
           fi
 
-          echo "✅ Manifest file found: $MANIFEST_FILE"
+          echo "✅ Manifest file found"
 
       - name: Update manifest
         run: |
-          node scripts/update-manifest.js "${{ steps.params.outputs.manifest_file }}" "${{ steps.params.outputs.repo }}" "${{ steps.params.outputs.version }}" "${{ steps.params.outputs.run_id }}"
+          node scripts/update-manifest.js "${{ steps.params.outputs.manifest_file }}"  "${{ github.event.client_payload.owner }}"  "${{ github.event.client_payload.repo }}" "${{ steps.params.outputs.version }}" "${{ steps.params.outputs.run_id }}"
 
       - name: Validate updated manifest
         run: |
-          MANIFEST_FILE="${{ steps.params.outputs.manifest_file }}"
-
           echo "🔍 Validating updated manifest..."
-          if node scripts/validate-manifest.js "$MANIFEST_FILE"; then
+          if node scripts/validate-manifest.js "${{ steps.params.outputs.manifest_file }}"; then
             echo "✅ Manifest validation passed"
           else
             echo "❌ Manifest validation failed"

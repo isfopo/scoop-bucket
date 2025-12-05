@@ -13,7 +13,6 @@
  */
 
 const fs = require("fs");
-const path = require("path");
 const https = require("https");
 
 // Get command line arguments
@@ -26,7 +25,7 @@ if (args.length !== 4) {
   process.exit(1);
 }
 
-const [manifestFile, repo, version, runId] = args;
+const [manifestFile, owner, repo, version, runId] = args;
 
 /**
  * Make HTTPS request to GitHub API
@@ -81,12 +80,14 @@ function httpsRequest(url) {
 /**
  * Get release information from GitHub API
  */
-async function getReleaseInfo(repo, version) {
+async function getReleaseInfo(owner, repo, version) {
   try {
-    console.log(`🔍 Fetching release info for ${repo} version ${version}`);
+    console.log(
+      `🔍 Fetching release info for ${owner}/${repo} version ${version}`,
+    );
 
     // Get release information
-    const releaseUrl = `https://api.github.com/repos/${repo}/releases/tags/${version}`;
+    const releaseUrl = `https://api.github.com/repos/@{owner}/${repo}/releases/tags/${version}`;
 
     console.log(`🔗 Fetching release info from ${releaseUrl}`);
 
@@ -175,7 +176,7 @@ function downloadAsset(url) {
 /**
  * Update manifest with new release information
  */
-async function updateManifest(manifestPath, repo, newVersion, runId) {
+async function updateManifest(manifestPath, owner, repo, newVersion, runId) {
   try {
     // Read existing manifest
     if (!fs.existsSync(manifestPath)) {
@@ -188,7 +189,7 @@ async function updateManifest(manifestPath, repo, newVersion, runId) {
     console.log(`📄 Processing manifest: ${manifestPath}`);
 
     // Get release information from GitHub API
-    const releaseInfo = await getReleaseInfo(repo, newVersion);
+    const releaseInfo = await getReleaseInfo(owner, repo, newVersion);
 
     // Update version
     manifest.version = newVersion;
@@ -230,4 +231,4 @@ async function updateManifest(manifestPath, repo, newVersion, runId) {
 }
 
 // Execute the update
-updateManifest(manifestFile, repo, version, runId);
+updateManifest(manifestFile, owner, repo, version, runId);
