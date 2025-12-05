@@ -4,7 +4,7 @@
   "homepage": "https://github.com/isfopo/soundcheck",
   "license": "MIT",
   "url": "https://github.com/isfopo/soundcheck/releases/download/0.0.35/soundcheck-x86_64-pc-windows-msvc.zip",
-  "hash": "ae89776ab187a3d13f621a8c1fb4bb058eec3dbaffae0050d751aa396d147a81",
+  "hash": "1f402949a0b50fb52b47bbabe42c36c513a247d04d6e52e13f749baa17045c2c",
   "bin": "soundcheck.exe",
   "checkver": {
     "github": "https://github.com/isfopo/soundcheck"
