@@ -37,12 +37,14 @@ scoop install <package-name>
 This bucket currently includes the following packages:
 
 #### soundcheck
+
 - **Description**: Audio testing and validation tool
 - **Current Version**: 0.0.34
 - **Installation**: `scoop install soundcheck`
 - **Repository**: https://github.com/isfopo/soundcheck
 
 For example:
+
 ```bash
 scoop install soundcheck
 ```
@@ -78,7 +80,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: 'Release tag (e.g., v1.0.0)'
+        description: "Release tag (e.g., v1.0.0)"
         required: true
         type: string
 
@@ -177,84 +179,24 @@ Each manifest in the `bucket/` directory follows the Scoop manifest format. Here
 }
 ```
 
-## Scripts
-
-This repository includes several utility scripts:
-
-### `scripts/update-manifest.js`
-
-Updates a manifest file with new release information by fetching data from GitHub API.
-
-```bash
-node scripts/update-manifest.js <manifest-file> <owner> <repo> <version>
-```
-
-**Arguments:**
-- `manifest-file`: Path to the JSON manifest file
-- `owner`: Repository owner (username or organization)
-- `repo`: Repository name
-- `version`: New version to update
-
-The script automatically:
-- Fetches release information from GitHub API
-- Finds the Windows amd64 asset
-- Downloads the asset and calculates SHA256 hash
-- Updates the manifest with new version, URL, and hash
-- Configures autoupdate templates for future releases
-
-### `scripts/validate-manifest.js`
-
-Validates a manifest file against Scoop requirements.
-
-```bash
-node scripts/validate-manifest.js <manifest-file>
-```
-
-## Workflows
-
-### `release-scoop.yml`
-
-Unified workflow that handles both automatic and manual manifest updates:
-
-- **Repository Dispatch**: Triggered by other repositories when they publish releases using `scoop-release` event type
-- **Validation**: Automatically validates updated manifests before committing changes
-- **Direct Commits**: Commits and pushes changes directly to main branch (no PRs)
-- **Asset Detection**: Automatically finds Windows amd64 assets and calculates SHA256 hashes
-
-### `validate-manifests.yml`
-
-Runs on every push and pull request to validate all manifest files in the bucket.
-
-## Contributing
-
-1. Fork this repository
-2. Create a feature branch
-3. Add or update manifests in the `bucket/` directory
-4. Ensure all manifests pass validation
-5. Submit a pull request
-
-## Requirements for New Manifests
-
-- Must include all required fields: `version`, `homepage`, `license`, `url`, `hash`
-- Should follow semantic versioning
-- Must provide Windows binaries (either standalone or in archives)
-- Should include `checkver` and `autoupdate` for automatic updates
-
 ## Troubleshooting
 
 ### Common Issues
 
 **Manifest validation fails:**
+
 - Ensure all required fields are present: `version`, `homepage`, `license`, `url`, `hash`
 - Check that the URL is accessible and points to a Windows binary
 - Verify the SHA256 hash is correct (64 hexadecimal characters)
 
 **Automatic updates not working:**
+
 - Ensure the source repository workflow is triggering the correct `scoop-release` event
 - Check that the `SCOOP_BUCKET_TOKEN` has the correct permissions
 - Verify the manifest file exists in the `bucket/` directory
 
 **Package installation fails:**
+
 - Run `scoop install --verbose <package-name>` to see detailed error messages
 - Check if the download URL is accessible
 - Verify the binary name matches the `bin` field in the manifest
