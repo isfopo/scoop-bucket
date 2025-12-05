@@ -18,8 +18,10 @@ const https = require("https");
 // Get command line arguments
 const args = process.argv.slice(2);
 
-if (args.length !== 3) {
-  console.error("Usage: node update-manifest.js <owner> <repo> <version>");
+if (args.length !== 4) {
+  console.error(
+    "Usage: node update-manifest.js <manifest-file> <owner> <repo> <version>",
+  );
   process.exit(1);
 }
 
@@ -179,10 +181,8 @@ function downloadAsset(url) {
 /**
  * Update manifest with new release information
  */
-async function updateManifest(owner, repo, newVersion) {
+async function updateManifest(manifestPath, owner, repo, newVersion) {
   try {
-    const manifestPath = `bucket/${repo}.json`;
-
     // Read existing manifest
     if (!fs.existsSync(manifestPath)) {
       throw new Error(`Manifest file not found: ${manifestPath}`);
