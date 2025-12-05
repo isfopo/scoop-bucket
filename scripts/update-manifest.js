@@ -113,8 +113,13 @@ async function getReleaseInfo(owner, repo, version) {
 
     console.log(`🔐 Calculated SHA256: ${hash}`);
 
+    const repoUrl = release.html_url.match(
+      RegExp("https://github\.com/[^/]+/[^/]+"),
+    )[0];
+
     return {
       version: version,
+      repoUrl: repoUrl,
       releaseUrl: release.html_url,
       assetUrl: assetUrl,
       hash: hash,
@@ -193,9 +198,12 @@ async function updateManifest(owner, repo, newVersion) {
 
     // Update version
     manifest.version = newVersion;
+    manifest.homepage = releaseInfo.repoUrl;
 
     // Update URL to point to the new asset
     manifest.url = releaseInfo.assetUrl;
+
+    manifest.checkver.github = releaseInfo.repoUrl;
 
     // Update hash
     manifest.hash = releaseInfo.hash;
@@ -226,6 +234,7 @@ async function updateManifest(owner, repo, newVersion) {
     console.log(`   Hash: ${releaseInfo.hash}`);
   } catch (error) {
     console.error(`❌ Error updating manifest: ${error.message}`);
+  } finally {
     process.exit(1);
   }
 }
