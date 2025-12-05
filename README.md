@@ -19,10 +19,8 @@ This bucket is designed to work with automated release workflows. When a new rel
 To add this bucket to your Scoop installation:
 
 ```bash
-scoop bucket add <bucket-name> https://github.com/your-username/scoop-bucket
+scoop bucket add scoop-bucket https://github.com/isfopo/scoop-bucket
 ```
-
-Replace `<bucket-name>` with your desired bucket name and `your-username` with your GitHub username.
 
 ## Usage
 
