@@ -18,14 +18,12 @@ const https = require("https");
 // Get command line arguments
 const args = process.argv.slice(2);
 
-if (args.length !== 4) {
-  console.error(
-    "Usage: node update-manifest.js <manifest-file> <repo> <version> <run-id>",
-  );
+if (args.length !== 3) {
+  console.error("Usage: node update-manifest.js <owner> <repo> <version>");
   process.exit(1);
 }
 
-const [manifestFile, owner, repo, version, runId] = args;
+updateManifest(...args);
 
 /**
  * Make HTTPS request to GitHub API
@@ -87,7 +85,7 @@ async function getReleaseInfo(owner, repo, version) {
     );
 
     // Get release information
-    const releaseUrl = `https://api.github.com/repos/@{owner}/${repo}/releases/tags/${version}`;
+    const releaseUrl = `https://api.github.com/repos/${owner}/${repo}/releases/tags/${version}`;
 
     console.log(`🔗 Fetching release info from ${releaseUrl}`);
 
@@ -176,8 +174,10 @@ function downloadAsset(url) {
 /**
  * Update manifest with new release information
  */
-async function updateManifest(manifestPath, owner, repo, newVersion, runId) {
+async function updateManifest(owner, repo, newVersion) {
   try {
+    const manifestPath = `bucket/${repo}.json`;
+
     // Read existing manifest
     if (!fs.existsSync(manifestPath)) {
       throw new Error(`Manifest file not found: ${manifestPath}`);
@@ -229,6 +229,3 @@ async function updateManifest(manifestPath, owner, repo, newVersion, runId) {
     process.exit(1);
   }
 }
-
-// Execute the update
-updateManifest(manifestFile, owner, repo, version, runId);
