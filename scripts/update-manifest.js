@@ -22,7 +22,7 @@ if (args.length !== 4) {
   console.error(
     "Usage: node update-manifest.js <manifest-file> <owner> <repo> <version>",
   );
-  process.exit(1);
+  process.exit(5);
 }
 
 updateManifest(...args);
@@ -232,9 +232,10 @@ async function updateManifest(manifestPath, owner, repo, newVersion) {
     console.log(`   Version: ${newVersion}`);
     console.log(`   URL: ${releaseInfo.assetUrl}`);
     console.log(`   Hash: ${releaseInfo.hash}`);
+
+    process.exit(0);
   } catch (error) {
     console.error(`❌ Error updating manifest: ${error.message}`);
-  } finally {
     process.exit(1);
   }
 }
