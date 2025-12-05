@@ -19,7 +19,7 @@ This bucket is designed to work with automated release workflows. When a new rel
 To add this bucket to your Scoop installation:
 
 ```bash
-scoop bucket add scoop-bucket https://github.com/isfopo/scoop-bucket
+scoop bucket add isfopo https://github.com/isfopo/scoop-bucket
 ```
 
 ## Usage
@@ -32,6 +32,16 @@ Once the bucket is added, you can install packages:
 scoop install <package-name>
 ```
 
+### Available Packages
+
+This bucket currently includes the following packages:
+
+#### soundcheck
+- **Description**: Audio testing and validation tool
+- **Current Version**: 0.0.34
+- **Installation**: `scoop install soundcheck`
+- **Repository**: https://github.com/isfopo/soundcheck
+
 For example:
 ```bash
 scoop install soundcheck
@@ -42,7 +52,7 @@ scoop install soundcheck
 To manually update all packages in this bucket:
 
 ```bash
-scoop update <bucket-name>
+scoop update isfopo
 ```
 
 ## For Repository Maintainers
@@ -84,11 +94,11 @@ jobs:
             -H "Content-Type: application/json" \
             https://api.github.com/repos/isfopo/scoop-bucket/dispatches \
             -d '{
-              "event_type": "release-update",
+              "event_type": "scoop-release",
               "client_payload": {
-                "version": "${{ github.event.inputs.tag_name || github.event.release.tag_name }}",
-                "repo": "${{ github.repository }}",
-                "run_id": "${{ github.run_id }}"
+                "owner": "${{ github.repository_owner }}",
+                "repo": "${{ github.event.repository.name }}",
+                "version": "${{ github.event.inputs.tag_name || github.event.release.tag_name }}"
               }
             }'
 ```
@@ -97,7 +107,7 @@ jobs:
 
 1. **Automatic Trigger**: When a new release is published, the workflow automatically triggers
 2. **Manual Trigger**: You can also manually trigger the workflow and specify a tag
-3. **Simplified Payload**: Only sends version, repo, and run_id - the bucket fetches release details automatically
+3. **Simplified Payload**: Only sends owner, repo, and version - the bucket fetches release details automatically
 4. **Asset Detection**: The bucket automatically finds the Windows amd64 asset and calculates its hash
 5. **Direct Commits**: Changes are committed directly to the main branch (no pull requests)
 
@@ -113,15 +123,38 @@ You can also trigger updates directly in the scoop-bucket repository:
 2. Select the **Release** workflow
 3. Click **Run workflow**
 4. Fill in the required parameters:
-   - **Repository path**: `owner/repo` (e.g., `myorg/soundcheck`)
+   - **Owner**: Repository owner (e.g., `myorg`)
+   - **Repository**: Repository name (e.g., `soundcheck`)
    - **Version**: Version number (e.g., `1.0.0`)
-   - **Run ID**: Optional GitHub Actions run ID for tracking
 
 The workflow will update the manifest and commit changes directly to the main branch.
 
 ### Manifest Structure
 
-Each manifest in the `bucket/` directory follows the Scoop manifest format:
+Each manifest in the `bucket/` directory follows the Scoop manifest format. Here's an example from the current `soundcheck` package (version 0.0.34):
+
+```json
+{
+  "version": "0.0.34",
+  "description": "Soundcheck - Audio testing and validation tool",
+  "homepage": "https://github.com/isfopo/soundcheck",
+  "license": "MIT",
+  "url": "https://github.com/isfopo/soundcheck/releases/download/0.0.34/soundcheck-x86_64-pc-windows-msvc.zip",
+  "hash": "a5947844838708509fd15255625b0009d97c252cd01504cb7873eb5224186fbf",
+  "bin": "soundcheck.exe",
+  "checkver": {
+    "github": "https://github.com/isfopo/soundcheck"
+  },
+  "autoupdate": {
+    "url": "https://github.com/isfopo/soundcheck/releases/download/0.0.34/soundcheck-x86_64-pc-windows-msvc.zip",
+    "hash": {
+      "url": "https://github.com/isfopo/soundcheck/releases/download/0.0.34/soundcheck-x86_64-pc-windows-msvc.zip.sha256"
+    }
+  }
+}
+```
+
+**General manifest format:**
 
 ```json
 {
@@ -153,14 +186,14 @@ This repository includes several utility scripts:
 Updates a manifest file with new release information by fetching data from GitHub API.
 
 ```bash
-node scripts/update-manifest.js <manifest-file> <repo> <version> <run-id>
+node scripts/update-manifest.js <manifest-file> <owner> <repo> <version>
 ```
 
 **Arguments:**
 - `manifest-file`: Path to the JSON manifest file
-- `repo`: Full repository path (owner/repo)
+- `owner`: Repository owner (username or organization)
+- `repo`: Repository name
 - `version`: New version to update
-- `run-id`: GitHub Actions run ID that triggered the update
 
 The script automatically:
 - Fetches release information from GitHub API
@@ -179,14 +212,14 @@ node scripts/validate-manifest.js <manifest-file>
 
 ## Workflows
 
-### `release.yml`
+### `release-scoop.yml`
 
 Unified workflow that handles both automatic and manual manifest updates:
 
-- **Repository Dispatch**: Triggered by other repositories when they publish releases
-- **Manual Dispatch**: Can be run manually from the Actions tab with custom parameters
+- **Repository Dispatch**: Triggered by other repositories when they publish releases using `scoop-release` event type
 - **Validation**: Automatically validates updated manifests before committing changes
 - **Direct Commits**: Commits and pushes changes directly to main branch (no PRs)
+- **Asset Detection**: Automatically finds Windows amd64 assets and calculates SHA256 hashes
 
 ### `validate-manifests.yml`
 
@@ -207,13 +240,33 @@ Runs on every push and pull request to validate all manifest files in the bucket
 - Must provide Windows binaries (either standalone or in archives)
 - Should include `checkver` and `autoupdate` for automatic updates
 
+## Troubleshooting
+
+### Common Issues
+
+**Manifest validation fails:**
+- Ensure all required fields are present: `version`, `homepage`, `license`, `url`, `hash`
+- Check that the URL is accessible and points to a Windows binary
+- Verify the SHA256 hash is correct (64 hexadecimal characters)
+
+**Automatic updates not working:**
+- Ensure the source repository workflow is triggering the correct `scoop-release` event
+- Check that the `SCOOP_BUCKET_TOKEN` has the correct permissions
+- Verify the manifest file exists in the `bucket/` directory
+
+**Package installation fails:**
+- Run `scoop install --verbose <package-name>` to see detailed error messages
+- Check if the download URL is accessible
+- Verify the binary name matches the `bin` field in the manifest
+
 ## Support
 
 If you encounter issues with any packages in this bucket:
 
-1. Check the [Issues](https://github.com/your-username/scoop-bucket/issues) page
+1. Check the [Issues](https://github.com/isfopo/scoop-bucket/issues) page
 2. Create a new issue with details about the problem
 3. Include the output of `scoop install --verbose <package-name>`
+4. For package-specific issues, also check the upstream repository
 
 ## License
 
